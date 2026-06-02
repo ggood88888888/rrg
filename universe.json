@@ -1,0 +1,52 @@
+{
+  "_comment": "Modifica liberamente questo file per personalizzare l'universo. La GitHub Action rilegge questo file ad ogni esecuzione e scarica i prezzi dei ticker elencati. 'benchmarks' = simboli usabili come metro di paragone. Ogni gruppo ha un benchmark di default e una mappa ticker -> nome leggibile.",
+  "benchmarks": {
+    "SPY": "S&P 500",
+    "QQQ": "Nasdaq 100",
+    "RSP": "S&P 500 Equal Weight",
+    "ACWI": "MSCI All Country World"
+  },
+  "groups": {
+    "Settori S&P 500": {
+      "defaultBenchmark": "SPY",
+      "tickers": {
+        "XLK": "Technology",
+        "XLC": "Communication Services",
+        "XLY": "Consumer Discretionary",
+        "XLP": "Consumer Staples",
+        "XLE": "Energy",
+        "XLF": "Financials",
+        "XLV": "Health Care",
+        "XLI": "Industrials",
+        "XLB": "Materials",
+        "XLRE": "Real Estate",
+        "XLU": "Utilities"
+      }
+    },
+    "MAG7": {
+      "defaultBenchmark": "QQQ",
+      "tickers": {
+        "AAPL": "Apple",
+        "MSFT": "Microsoft",
+        "GOOGL": "Alphabet",
+        "AMZN": "Amazon",
+        "NVDA": "NVIDIA",
+        "TSLA": "Tesla",
+        "META": "Meta Platforms"
+      }
+    },
+    "Asset & Regioni": {
+      "defaultBenchmark": "SPY",
+      "tickers": {
+        "IWM": "Small Cap US (Russell 2000)",
+        "EFA": "Mercati sviluppati ex-US",
+        "EEM": "Mercati emergenti",
+        "GLD": "Oro",
+        "TLT": "Treasury 20+ anni",
+        "HYG": "High Yield bond",
+        "DBC": "Commodities",
+        "VNQ": "REIT US"
+      }
+    }
+  }
+}

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RRG · Relative Rotation Graph</title>
+  <meta name="description" content="Relative Rotation Graph interattivo per settori, MAG7 e asset — rotazione e momentum relativo vs benchmark." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◷</span>
+      <div>
+        <h1>Relative Rotation Graph</h1>
+        <p class="sub">Rotazione e momentum relativo vs benchmark · <span id="dataDate">—</span></p>
+      </div>
+    </div>
+    <button id="helpBtn" class="ghost-btn" title="Come si legge">? Come si legge</button>
+  </header>
+
+  <main class="layout">
+    <!-- MASCHERA -->
+    <aside class="panel mask">
+      <h2>Maschera</h2>
+
+      <label class="field">
+        <span>Universo</span>
+        <select id="groupSel"></select>
+      </label>
+
+      <div class="field">
+        <span>Strumenti <small id="symCount"></small></span>
+        <div id="symList" class="chips"></div>
+        <div class="row tight">
+          <button id="selAll" class="mini-btn">Tutti</button>
+          <button id="selNone" class="mini-btn">Nessuno</button>
+        </div>
+      </div>
+
+      <label class="field">
+        <span>Benchmark</span>
+        <select id="benchSel"></select>
+      </label>
+
+      <label class="field">
+        <span>Timeframe</span>
+        <div class="seg" id="tfSeg">
+          <button data-tf="weekly" class="active">Settimanale</button>
+          <button data-tf="daily">Giornaliero</button>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Lunghezza coda: <b id="tailVal">12</b> <small id="tailUnit">sett.</small></span>
+        <input type="range" id="tailRange" min="3" max="26" value="12" />
+      </label>
+
+      <details class="adv">
+        <summary>Parametri avanzati</summary>
+        <label class="field">
+          <span>Smoothing RS: <b id="smoothVal">10</b></span>
+          <input type="range" id="smoothRange" min="2" max="20" value="10" />
+        </label>
+        <label class="field">
+          <span>Finestra momentum: <b id="momVal">4</b></span>
+          <input type="range" id="momRange" min="1" max="12" value="4" />
+        </label>
+        <label class="field">
+          <span>Finestra z-score: <b id="zVal">26</b></span>
+          <input type="range" id="zRange" min="8" max="52" value="26" />
+        </label>
+        <button id="resetParams" class="mini-btn">Ripristina default</button>
+      </details>
+    </aside>
+
+    <!-- GRAFICO RRG -->
+    <section class="panel chart-panel">
+      <div class="chart-head">
+        <h2>RRG</h2>
+        <div class="playback">
+          <button id="playBtn" class="mini-btn play">▶ Anima</button>
+          <input type="range" id="frameRange" min="0" max="0" value="0" />
+          <span id="frameDate" class="mono">—</span>
+        </div>
+      </div>
+      <div id="rrg" class="plot"></div>
+    </section>
+
+    <!-- INSIGHT -->
+    <aside class="panel insight">
+      <h2>Insight</h2>
+      <p class="hint">Ordinati per probabilità di upside in prospettiva.</p>
+      <div id="insightList"></div>
+    </aside>
+  </main>
+
+  <!-- TREND -->
+  <section class="panel trend-panel">
+    <div class="chart-head">
+      <h2>Trend prezzi (base 100)</h2>
+      <div class="seg" id="trendSeg">
+        <button data-days="180" class="active">6 mesi</button>
+        <button data-days="90">3 mesi</button>
+        <button data-days="365">12 mesi</button>
+      </div>
+    </div>
+    <div id="trends" class="plot trend"></div>
+  </section>
+
+  <footer class="foot">
+    <span>Dati: Yahoo Finance (adjusted close) · aggiornati via GitHub Action.</span>
+    <span class="mono" id="footGen"></span>
+  </footer>
+
+  <!-- MODALE AIUTO -->
+  <div id="helpModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="modal-close" id="helpClose">×</button>
+      <h3>Come si legge l'RRG</h3>
+      <p>Ogni strumento è un punto posizionato in base a <b>forza relativa</b> (asse X, RS-Ratio) e <b>slancio</b> di quella forza (asse Y, RS-Momentum), <b>rispetto al benchmark</b>. Il centro (100,100) = in linea col benchmark.</p>
+      <ul class="legend-list">
+        <li><span class="dot" style="background:#3b82f6"></span><b>Improving</b> (alto-sx): più debole del benchmark ma sta recuperando slancio → <b>spesso upside in arrivo</b>.</li>
+        <li><span class="dot" style="background:#22c55e"></span><b>Leading</b> (alto-dx): più forte e con slancio → leadership in corso.</li>
+        <li><span class="dot" style="background:#eab308"></span><b>Weakening</b> (basso-dx): ancora forte ma lo slancio cala → <b>spesso "già ai massimi"</b>.</li>
+        <li><span class="dot" style="background:#ef4444"></span><b>Lagging</b> (basso-sx): debole e senza slancio.</li>
+      </ul>
+      <p>La rotazione tipica è <b>oraria</b>: Improving → Leading → Weakening → Lagging. La <b>coda</b> mostra il percorso recente; la <b>freccia</b> la direzione. Usa <b>▶ Anima</b> per vedere la rotazione nel tempo.</p>
+      <p class="hint">Nota metodologica: RS-Ratio/Momentum sono normalizzati (z-score) sulla storia di ciascuno strumento e centrati a 100. È un'approssimazione del metodo JdK, utile per il confronto visivo, non un segnale operativo.</p>
+    </div>
+  </div>
+
+  <script src="js/engine.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
