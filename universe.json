@@ -10,7 +10,7 @@
     "Settori S&P 500": {
       "defaultBenchmark": "SPY",
       "tickers": {
-        "XLK": "Technology",
+        "^YH311": "Technology",
         "XLC": "Communication Services",
         "XLY": "Consumer Discretionary",
         "XLP": "Consumer Staples",
